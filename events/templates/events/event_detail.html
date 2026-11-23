@@ -1,0 +1,428 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}{{ event.title }} | Campus Event Management System{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb Trail -->
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-glass mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><span class="badge badge-indigo-glass me-1">{{ event.category.name }}</span> {{ event.title }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Main Event Details Column -->
+    <div class="col-12 col-lg-8">
+        <div class="glass-card">
+            <!-- Event Banner Image Container -->
+            <div class="event-card-img-wrapper mb-4" style="height: 340px; aspect-ratio: auto; border-radius: 12px; overflow: hidden;">
+                {% if event.banner_image %}
+                    <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.src='{% static 'images/banners/tech_banner.png' %}';">
+                {% else %}
+                    <div class="d-flex flex-column justify-content-center align-items-center h-100 p-4 text-center position-relative" style="background: linear-gradient(135deg, #F3F4F6, #E5E7EB); border: 1px solid var(--color-border);">
+                        <div class="position-absolute opacity-10">
+                            <i class="bi bi-stars display-1 text-info"></i>
+                        </div>
+                        <span class="badge badge-indigo-glass fs-6 mb-3"><i class="bi bi-tag-fill me-1"></i>{{ event.category.name }}</span>
+                        <h2 class="fw-bold mb-2 fs-1 px-3" style="z-index: 1;">{{ event.title }}</h2>
+                        <p class="text-info opacity-90 mb-0 fs-6" style="z-index: 1;"><i class="bi bi-geo-alt-fill me-1"></i>{{ event.venue.venue_name|default:"Campus Venue" }}</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex gap-2 align-items-center">
+                    <span class="badge badge-indigo-glass fs-6">
+                        <i class="bi bi-tag-fill me-1"></i>{{ event.category.name }}
+                    </span>
+                    <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-25 fs-6">
+                        <i class="bi bi-building me-1"></i>Dept: {{ event.department_name }}
+                    </span>
+                </div>
+                <span class="badge {% if event.approval_status == 'approved' %}badge-approved{% else %}badge-pending{% endif %}">
+                    {{ event.approval_status|title }}
+                </span>
+            </div>
+
+            <h1 class="fw-bold text-white mb-3 fs-2">{{ event.title }}</h1>
+
+            <!-- Highlighted Detailed Event Description Card -->
+            <div class="glass-card bg-dark bg-opacity-75 p-4 rounded-3 mb-4 border border-primary border-opacity-25 shadow-lg">
+                <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-secondary border-opacity-50 pb-2 flex-wrap gap-2">
+                    <h5 class="fw-bold text-white mb-0">
+                        <i class="bi bi-file-text text-primary me-2 fs-5"></i>Event Overview &amp; Complete Description
+                    </h5>
+                    <div class="d-flex gap-2 align-items-center">
+                        <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-25 px-3 py-1">
+                            <i class="bi bi-building me-1"></i>Conducting Dept: {{ event.department_name }}
+                        </span>
+                        <span class="badge bg-primary bg-opacity-25 text-info border border-primary border-opacity-25 px-3 py-1">
+                            <i class="bi bi-person-circle me-1"></i>By {{ event.organizer.full_name }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Conducting Department Notice Banner -->
+                <div class="p-3 glass-card bg-info bg-opacity-10 border border-info border-opacity-25 rounded-3 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-building-fill text-info fs-4"></i>
+                        <div>
+                            <small class="text-secondary d-block" style="font-size:0.75rem;">Hosted &amp; Conducted By Department</small>
+                            <span class="fw-bold text-white fs-6">{{ event.department_name }}</span>
+                        </div>
+                    </div>
+                    <span class="badge bg-info text-dark font-monospace px-3 py-1 fw-bold fs-6">Official Department Event</span>
+                </div>
+
+                <!-- Main Event Description Paragraph -->
+                <div class="text-secondary leading-relaxed fs-6 mb-4" style="white-space: pre-line; line-height: 1.75;">
+                    {{ event.description }}
+                </div>
+
+                <!-- Skills Learned Section Embedded Directly in Event Description Card -->
+                <div class="p-3 glass-card bg-warning bg-opacity-10 border border-warning border-opacity-25 rounded-3">
+                    <h6 class="fw-bold text-warning mb-2">
+                        <i class="bi bi-lightbulb-fill me-2"></i>Skills You Will Learn &amp; Gain Upon Registration
+                    </h6>
+                    <p class="text-secondary small mb-3">By registering and participating in this event, students develop and master:</p>
+                    {% if event.skills_list %}
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for skill in event.skills_list %}
+                                <span class="badge px-3 py-2 fs-6 rounded-pill fw-bold" style="background: rgba(200, 155, 60, 0.08); border: 1px solid rgba(200, 155, 60, 0.25); color: #C89B3C !important;">
+                                    <i class="bi bi-patch-check-fill text-warning me-1.5"></i>{{ skill }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                         <div class="d-flex flex-wrap gap-2">
+                            <span class="badge px-3 py-2 fs-6 rounded-pill fw-bold" style="background: rgba(200, 155, 60, 0.08); border: 1px solid rgba(200, 155, 60, 0.25); color: #C89B3C !important;">
+                                <i class="bi bi-patch-check-fill text-warning me-1.5"></i>Technical Problem Solving
+                            </span>
+                            <span class="badge px-3 py-2 fs-6 rounded-pill fw-bold" style="background: rgba(200, 155, 60, 0.08); border: 1px solid rgba(200, 155, 60, 0.25); color: #C89B3C !important;">
+                                <i class="bi bi-patch-check-fill text-warning me-1.5"></i>Team Collaboration
+                            </span>
+                            <span class="badge px-3 py-2 fs-6 rounded-pill fw-bold" style="background: rgba(200, 155, 60, 0.08); border: 1px solid rgba(200, 155, 60, 0.25); color: #C89B3C !important;">
+                                <i class="bi bi-patch-check-fill text-warning me-1.5"></i>Hands-On Practical Skills
+                            </span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Detailed Event Info Grid -->
+            <h5 class="fw-bold mb-3"><i class="bi bi-info-circle text-primary me-2"></i>Event Logistics &amp; Schedule</h5>
+            <div class="row g-3 p-3 glass-card mb-4" style="background-color: var(--color-bg) !important; border: 1px solid var(--color-border) !important;">
+                <div class="col-6 col-md-4">
+                    <small class="text-secondary d-block mb-1">Conducting Department</small>
+                    <span class="fw-bold text-info"><i class="bi bi-building text-info me-1"></i>{{ event.department_name }}</span>
+                </div>
+                <div class="col-6 col-md-2">
+                    <small class="text-secondary d-block mb-1">Date</small>
+                    <span class="fw-bold"><i class="bi bi-calendar-event text-primary me-1"></i>{{ event.date }}</span>
+                </div>
+                <div class="col-6 col-md-2">
+                    <small class="text-secondary d-block mb-1">Time</small>
+                    <span class="fw-bold"><i class="bi bi-clock text-info me-1"></i>{{ event.time|time:"h:i A" }}</span>
+                </div>
+                <div class="col-6 col-md-2">
+                    <small class="text-secondary d-block mb-1">Venue</small>
+                    <span class="fw-bold"><i class="bi bi-geo-alt text-warning me-1"></i>{{ event.venue.venue_name|default:"TBA" }}</span>
+                </div>
+                <div class="col-6 col-md-2">
+                    <small class="text-secondary d-block mb-1">Max Capacity</small>
+                    <span class="fw-bold"><i class="bi bi-people text-success me-1"></i>{{ event.max_participants }} Members</span>
+                </div>
+            </div>
+
+            <!-- Participant Feedback & Reviews -->
+            <h5 class="fw-bold mb-3"><i class="bi bi-chat-left-stars text-warning me-2"></i>Participant Reviews ({{ avg_rating }}★)</h5>
+            {% if feedbacks %}
+                <div class="space-y-3">
+                    {% for fb in feedbacks %}
+                        <div class="p-3 glass-card bg-light rounded-3 mb-2 border">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-info"><i class="bi bi-person-circle me-1"></i>{{ fb.student.full_name }}</span>
+                                <span class="badge badge-warning-glass">{{ fb.rating }}★</span>
+                            </div>
+                            <p class="text-secondary small mb-0">{{ fb.comments }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-secondary small mb-0">No feedback reviews submitted yet for this event.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sticky Registration Sidebar Column -->
+    <div class="col-12 col-lg-4">
+        <div class="glass-card text-center sticky-top" style="top: 90px;">
+            <h4 class="fw-bold mb-2"><i class="bi bi-ticket-perforated text-primary me-2"></i>Event Registration Gate</h4>
+            <p class="text-secondary small mb-3">Deadline: <strong style="color: var(--color-danger);">{{ event.deadline|date:"M d, Y H:i" }}</strong></p>
+
+            {% if request.user.is_authenticated and request.user.role == 'student' %}
+                {% if is_registered %}
+                    <div class="alert alert-success bg-success bg-opacity-25 border-success mb-3">
+                        <i class="bi bi-check-circle-fill me-2"></i>You are registered for this event!
+                    </div>
+                    <button class="btn btn-warning w-100 mb-2 py-2 fw-bold" onclick="showDigitalPass('{{ student_reg.ticket_code }}', '{{ event.title|escapejs }}', '{{ request.user.full_name|escapejs }}', '{{ event.venue.venue_name|escapejs }}', '{{ event.date }}')">
+                        <i class="bi bi-qr-code me-2"></i>View Digital Pass
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm w-100 mt-1" onclick="cancelRegistration({{ student_reg.registration_id }})">
+                        Cancel Registration
+                    </button>
+                {% else %}
+                    <!-- About Event Summary Box before Registering -->
+                    <div class="p-3 glass-card mb-3 text-start border border-secondary border-opacity-25 rounded-3">
+                        <div class="d-flex align-items-center gap-2 mb-2 pb-1 border-bottom border-secondary border-opacity-25">
+                            <i class="bi bi-info-circle-fill text-primary"></i>
+                            <span class="fw-bold small text-uppercase tracking-wider">About This Event</span>
+                        </div>
+                        <p class="text-secondary small mb-2" style="line-height: 1.5;">
+                            {{ event.description }}
+                        </p>
+                        {% if event.skills_list %}
+                            <div class="pt-2 border-top border-secondary border-opacity-25">
+                                <small class="text-warning fw-bold d-block mb-1" style="font-size:0.72rem;"><i class="bi bi-lightbulb me-1"></i>Skills You'll Gain:</small>
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% for skill in event.skills_list|slice:":3" %}
+                                        <span class="badge px-2 py-1 rounded-pill fw-bold" style="background: rgba(200, 155, 60, 0.08); border: 1px solid rgba(200, 155, 60, 0.25); color: #C89B3C !important; font-size:0.7rem;">{{ skill }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="p-3 glass-card mb-3 text-start" style="background-color: var(--color-bg) !important; border: 1px solid var(--color-border) !important;">
+                        <small class="text-secondary d-block mb-1">Registration Fee</small>
+                        <h3 class="fw-bold text-success mb-0">₹{{ event.registration_fee }} <small class="fs-6 text-secondary fw-normal">/ member</small></h3>
+                    </div>
+                    <button class="btn btn-glass-primary btn-lg w-100 py-3 fs-6" onclick="startPaidRegistration({{ event.event_id }}, {{ event.registration_fee }}, {{ event.max_participants }})">
+                        <i class="bi bi-ticket-perforated me-2"></i>Register Now <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                {% endif %}
+            {% elif not request.user.is_authenticated %}
+                <a href="{% url 'login_page' %}" class="btn btn-glass-primary btn-lg w-100 py-3 fs-6">
+                    Sign In to Register
+                </a>
+            {% else %}
+                <div class="alert alert-info bg-info bg-opacity-25 border-info text-white">
+                    Logged in as <strong>{{ request.user.role }}</strong>. Student account required for event registration.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Multi-Step Paid Event Registration Modal -->
+<div class="modal fade" id="paidRegistrationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content glass-card p-4 position-relative">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="regModalTitle"><i class="bi bi-ticket-perforated text-primary me-2"></i>Event Registration</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3">
+                <!-- STEP 1: Event Description Summary & Team Size Input -->
+                <div id="regStep1">
+                    <!-- Event Overview Preview inside Modal before completing registration -->
+                    <div class="p-3 glass-card mb-3 rounded-3 text-start" style="background-color: var(--color-bg) !important; border: 1px solid var(--color-border) !important;">
+                        <div class="d-flex align-items-center justify-content-between mb-2 border-bottom border-secondary border-opacity-50 pb-2">
+                            <span class="fw-bold fs-6"><i class="bi bi-file-text text-primary me-2"></i>{{ event.title }} - Description &amp; Overview</span>
+                            <span class="badge badge-indigo-glass">{{ event.category.name }}</span>
+                        </div>
+                        <p class="text-secondary small mb-2" style="white-space: pre-line; max-height: 140px; overflow-y: auto; line-height: 1.5;">
+                            {{ event.description }}
+                        </p>
+                        <div class="d-flex flex-wrap gap-3 text-info small pt-2 border-top border-secondary border-opacity-25">
+                            <span><i class="bi bi-building text-info me-1"></i>Dept: {{ event.department_name }}</span>
+                            <span><i class="bi bi-calendar-event text-primary me-1"></i>{{ event.date }}</span>
+                            <span><i class="bi bi-clock text-info me-1"></i>{{ event.time|time:"h:i A" }}</span>
+                            <span><i class="bi bi-geo-alt text-warning me-1"></i>{{ event.venue.venue_name|default:"Campus Venue" }}</span>
+                        </div>
+                    </div>
+
+                    <p class="text-secondary small mb-3">Select the number of members registering for this event.</p>
+                    <div class="mb-3">
+                        <label class="form-label">How many members are registering? *</label>
+                        <input type="number" id="regNumMembers" class="form-control form-control-glass fs-5 text-center fw-bold" value="1" min="1" oninput="calculateTotalFee()">
+                    </div>
+                    <div class="p-3 glass-card mb-3 text-center" style="background-color: var(--color-bg) !important; border: 1px solid var(--color-border) !important;">
+                        <div class="small text-secondary mb-1">Fee Breakdown</div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Unit Fee: <strong id="regUnitFee">₹0.00</strong></span>
+                            <span class="fs-4 fw-bold text-success" id="regTotalAmount">₹0.00</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-glass-primary w-100 py-2 fs-5" onclick="submitInitiateRegistration()">
+                        Proceed to Payment <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                </div>
+
+                <!-- STEP 2: QR Payment Screen -->
+                <!-- STEP 2: QR Payment & Verification Screenshot Upload Screen -->
+                <div id="regStep2" style="display: none;">
+                    <div class="text-center mb-3">
+                        <span class="badge badge-warning-glass px-3 py-1 mb-2" id="payGatewayBadge">Payment &amp; Transaction Scanner</span>
+                        <h5 class="fw-bold mb-1" id="payEventTitle">{{ event.title }}</h5>
+                        <p class="text-secondary small">Scan QR Code, complete payment, and upload payment screenshot below</p>
+                    </div>
+
+                    <div class="text-center p-3 glass-card mb-3" style="background-color: var(--color-bg) !important; border: 1px solid var(--color-border) !important;">
+                        <img id="payQrImage" src="" alt="Payment QR Code" class="img-fluid rounded-3 mb-2 border border-secondary p-2 bg-white" style="max-width: 220px; max-height: 220px; object-fit: contain;">
+                        <h3 class="fw-bold text-success mb-1" id="payTotalDisplay">₹0.00</h3>
+                        <p class="text-secondary small mb-0"><span id="payMembersCount">1</span> Member(s) &bull; Official Campus Pay QR</p>
+                    </div>
+
+                    <!-- Payment Verification Upload Field -->
+                    <div class="mb-3 text-start glass-card p-3" style="background-color: var(--color-bg) !important; border: 1px solid var(--color-border) !important;">
+                        <label class="form-label fw-bold small"><i class="bi bi-file-earmark-image text-warning me-1"></i>Upload Payment Screenshot Proof *</label>
+                        <input type="file" id="payScreenshotFile" class="form-control form-control-glass" accept="image/*" onchange="previewPayScreenshot(event)" required>
+                        <div class="form-text text-secondary small">Please upload a clear screenshot of your payment receipt / UPI confirmation screen.</div>
+                        <div id="pay-screenshot-preview-container" class="mt-2 text-center" style="display: none;">
+                            <small class="text-info d-block mb-1">Screenshot Preview:</small>
+                            <img id="pay-screenshot-preview" src="" alt="Payment Screenshot Preview" class="img-fluid rounded-3 border border-info" style="max-height: 140px; object-fit: contain;">
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-success w-100 py-2 fs-5 fw-bold" onclick="submitConfirmPayment()">
+                        <i class="bi bi-patch-check-fill me-2"></i>Submit Payment Proof &amp; Complete Registration
+                    </button>
+                </div>
+
+                <!-- STEP 3: Registration Successful Screen -->
+                <div id="regStep3" style="display: none;">
+                    <div class="text-center py-2">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 3.5rem;"></i>
+                        <h4 class="fw-bold mt-2">Registration Successful!</h4>
+                        <p class="text-secondary small mb-3">Your payment screenshot proof has been submitted for organizer/faculty verification.</p>
+
+                        <div class="glass-card p-3 text-start mb-3 space-y-2" style="background-color: var(--color-bg) !important; border: 1px solid var(--color-border) !important;">
+                            <div><small class="text-secondary">Event:</small> <strong id="succEventTitle">--</strong></div>
+                            <div><small class="text-secondary">Ticket Pass Code:</small> <strong class="text-warning font-monospace" id="succTicketCode">--</strong></div>
+                            <div><small class="text-secondary">Registered Members:</small> <strong id="succMembers">--</strong></div>
+                            <div><small class="text-secondary">Amount Paid:</strong class="text-success" id="succAmount">--</strong></div>
+                            <div><small class="text-secondary">Transaction ID:</small> <strong class="text-info font-monospace" id="succTxnId">--</strong></div>
+                        </div>
+
+                        <a href="/dashboard/student/" class="btn btn-glass-primary w-100 py-2">
+                            <i class="bi bi-ticket-detailed me-2"></i>Go to My Registered Events
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentEventId = {{ event.event_id }};
+    let currentUnitFee = parseFloat("{{ event.registration_fee }}") || 0;
+    let regModalInstance = null;
+
+    function previewPayScreenshot(event) {
+        const file = event.target.files[0];
+        const container = document.getElementById('pay-screenshot-preview-container');
+        const img = document.getElementById('pay-screenshot-preview');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                container.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
+    function startPaidRegistration(eventId, fee, maxCap) {
+        currentEventId = eventId;
+        currentUnitFee = parseFloat(fee) || 0;
+
+        document.getElementById('regNumMembers').value = 1;
+        calculateTotalFee();
+
+        document.getElementById('payScreenshotFile').value = '';
+        document.getElementById('pay-screenshot-preview-container').style.display = 'none';
+        document.getElementById('regStep1').style.display = 'block';
+        document.getElementById('regStep2').style.display = 'none';
+        document.getElementById('regStep3').style.display = 'none';
+
+        if (!regModalInstance) {
+            regModalInstance = new bootstrap.Modal(document.getElementById('paidRegistrationModal'));
+        }
+        regModalInstance.show();
+    }
+
+    function calculateTotalFee() {
+        const members = parseInt(document.getElementById('regNumMembers').value) || 1;
+        const total = (currentUnitFee * members).toFixed(2);
+        document.getElementById('regUnitFee').innerText = `₹${currentUnitFee.toFixed(2)}`;
+        document.getElementById('regTotalAmount').innerText = `₹${total}`;
+    }
+
+    async function submitInitiateRegistration() {
+        const members = parseInt(document.getElementById('regNumMembers').value) || 1;
+        const res = await apiCall(`/api/events/${currentEventId}/registration/initiate/`, 'POST', { num_members: members });
+
+        if (res.success) {
+            document.getElementById('payQrImage').src = res.data.qr_code_url;
+            document.getElementById('payTotalDisplay').innerText = `₹${res.data.total_amount.toFixed(2)}`;
+            document.getElementById('payMembersCount').innerText = res.data.num_members;
+
+            if (res.data.has_custom_scanner) {
+                document.getElementById('payGatewayBadge').innerText = 'Official Event Organizer Scanner';
+            } else {
+                document.getElementById('payGatewayBadge').innerText = 'Payment & Transaction Scanner';
+            }
+
+            document.getElementById('regStep1').style.display = 'none';
+            document.getElementById('regStep2').style.display = 'block';
+        } else {
+            showToast(res.error || res.message || 'Initiate failed.', 'error');
+        }
+    }
+
+    async function submitConfirmPayment() {
+        const fileInput = document.getElementById('payScreenshotFile');
+        if (fileInput.files.length === 0) {
+            showToast('Please upload a screenshot of your payment receipt before submitting.', 'error');
+            return;
+        }
+
+        const members = parseInt(document.getElementById('regNumMembers').value) || 1;
+        const mockTxnId = 'PAY-TXN-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+
+        const formData = new FormData();
+        formData.append('num_members', members);
+        formData.append('payment_id', mockTxnId);
+        formData.append('payment_screenshot', fileInput.files[0]);
+
+        const res = await apiCall(`/api/events/${currentEventId}/registration/confirm/`, 'POST', formData);
+
+        if (res.success) {
+            document.getElementById('succEventTitle').innerText = res.data.event_detail ? res.data.event_detail.title : 'Event';
+            document.getElementById('succTicketCode').innerText = res.data.ticket_code;
+            document.getElementById('succMembers').innerText = res.data.num_members;
+            document.getElementById('succAmount').innerText = `₹${parseFloat(res.data.amount_paid).toFixed(2)}`;
+            document.getElementById('succTxnId').innerText = res.data.payment_id;
+
+            document.getElementById('regStep2').style.display = 'none';
+            document.getElementById('regStep3').style.display = 'block';
+            showToast('Registration and payment screenshot submitted!', 'success');
+        } else {
+            showToast(res.error || res.message || 'Payment confirmation failed.', 'error');
+        }
+    }
+</script>
+{% endblock %}

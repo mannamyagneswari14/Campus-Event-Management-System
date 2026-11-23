@@ -1,0 +1,248 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}Home | Campus Event Management System{% endblock %}
+
+{% block content %}
+<!-- Hero Banner Section -->
+<div class="row align-items-center mb-5 py-3 reveal-on-scroll">
+    <div class="col-lg-7 mb-4 mb-lg-0">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill mb-3" style="background: rgba(38, 70, 83, 0.08); border: 1px solid rgba(38, 70, 83, 0.25);">
+            <i class="bi bi-stars text-primary fs-5"></i>
+            <span class="fw-bold text-primary fs-6">Centralized Campus Platform</span>
+        </div>
+        
+        <h1 class="hero-title hero-gradient-text mb-3">
+            Plan &bull; Register &bull; Participate &bull; Celebrate.
+        </h1>
+        
+        <p class="hero-subtitle mb-4">
+            Discover upcoming hackathons, cultural festivals, tech workshops, and sports meets. Grab your digital event passes and earn verified certificates effortlessly.
+        </p>
+        
+        <div class="d-flex flex-wrap gap-3">
+            <a href="#events-section" class="btn btn-glass-primary btn-lg px-4 py-3 fs-6">
+                <i class="bi bi-compass-fill me-2 fs-5"></i>Explore All Events <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+            {% if not request.user.is_authenticated %}
+                <a href="{% url 'register_page' %}" class="btn btn-glass-secondary btn-lg px-4 py-3 fs-6">
+                    <i class="bi bi-person-plus-fill me-2 fs-5"></i>Create Student Pass
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col-lg-5 text-center">
+        <div class="glass-card p-4">
+            <div class="row g-3">
+                <div class="col-6">
+                    <div class="stat-card d-flex flex-column align-items-center text-center p-3">
+                        <div class="stat-icon-wrapper mb-3" style="background: rgba(38, 70, 83, 0.08); color: #264653; border-color: rgba(38, 70, 83, 0.2);">
+                            <i class="bi bi-calendar-event-fill"></i>
+                        </div>
+                        <h2 class="fw-bold fs-1 mb-0">{{ total_events }}</h2>
+                        <span class="text-secondary fw-semibold small">Active Events</span>
+                    </div>
+                </div>
+                
+                <div class="col-6">
+                    <div class="stat-card d-flex flex-column align-items-center text-center p-3">
+                        <div class="stat-icon-wrapper mb-3" style="background: rgba(122, 158, 126, 0.08); color: #7A9E7E; border-color: rgba(122, 158, 126, 0.2);">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <h2 class="fw-bold fs-1 mb-0">{{ total_students }}</h2>
+                        <span class="text-secondary fw-semibold small">Registered Students</span>
+                    </div>
+                </div>
+                
+                <div class="col-6">
+                    <div class="stat-card d-flex flex-column align-items-center text-center p-3">
+                        <div class="stat-icon-wrapper mb-3" style="background: rgba(200, 155, 60, 0.08); color: #C89B3C; border-color: rgba(200, 155, 60, 0.2);">
+                            <i class="bi bi-qr-code-scan"></i>
+                        </div>
+                        <h2 class="fw-bold fs-1 mb-0">100%</h2>
+                        <span class="text-secondary fw-semibold small">Digital QR Verification</span>
+                    </div>
+                </div>
+                
+                <div class="col-6">
+                    <div class="stat-card d-flex flex-column align-items-center text-center p-3">
+                        <div class="stat-icon-wrapper mb-3" style="background: rgba(58, 125, 68, 0.08); color: #3A7D44; border-color: rgba(58, 125, 68, 0.2);">
+                            <i class="bi bi-award-fill"></i>
+                        </div>
+                        <h2 class="fw-bold fs-1 mb-0">Auto</h2>
+                        <span class="text-secondary fw-semibold small">Instant Certificates</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search & Categories Filter Bar -->
+<div id="events-section" class="row mb-4 reveal-on-scroll">
+    <div class="col-12">
+        <div class="glass-card p-3">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary text-primary fs-5 px-3"><i class="bi bi-search"></i></span>
+                        <input type="text" id="event-search-input" class="form-control form-control-glass py-2" placeholder="Search events by title, topic, or venue..." onkeyup="filterEvents()">
+                    </div>
+                </div>
+                
+                <div class="col-md-7 d-flex justify-content-md-end gap-2 overflow-x-auto pb-2 pb-md-0">
+                    <button class="btn btn-glass-secondary btn-sm active category-btn px-3" onclick="filterCategory('all', this)">All Categories</button>
+                    {% for cat in categories %}
+                        <button class="btn btn-glass-secondary btn-sm category-btn px-3" onclick="filterCategory('{{ cat.id }}', this)">{{ cat.name }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Unified Side-By-Side Events Grid Container -->
+<div id="events-grid-wrapper" class="mb-5 reveal-on-scroll">
+    <div class="row g-4" id="all-events-row">
+        {% for cat in categories %}
+            {% for event in cat.events.all %}
+                {% if event.approval_status == 'approved' and event.status == 'published' %}
+                    <div class="col-12 col-md-6 col-lg-4 event-card-item" data-category="{{ cat.id }}" data-category-name="{{ cat.name|lower }}" data-title="{{ event.title|lower }}">
+                        <div class="glass-card h-100 d-flex flex-column justify-content-between p-3 position-relative overflow-hidden">
+                            <div>
+                                <!-- Event Poster Image -->
+                                <div class="event-card-img-wrapper mb-3" style="height:180px; border-radius: 8px; overflow: hidden;">
+                                    {% if event.banner_image %}
+                                        <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.src='{% static 'images/banners/tech_banner.png' %}';">
+                                    {% else %}
+                                        <div class="d-flex flex-column justify-content-center align-items-center h-100 p-3 text-center rounded-3 position-relative overflow-hidden" style="background: linear-gradient(135deg, #F3F4F6, #E5E7EB); border: 1px solid var(--color-border);">
+                                            <div class="position-absolute top-0 end-0 p-3 opacity-25">
+                                                <i class="bi bi-calendar-event display-1 text-primary"></i>
+                                            </div>
+                                            <span class="badge bg-primary bg-opacity-10 text-primary mb-2 border border-primary border-opacity-25">{{ cat.name }}</span>
+                                            <h5 class="fw-bold text-dark mb-1 line-clamp-2 px-2" style="font-size: 1.1rem; z-index: 1;">{{ event.title }}</h5>
+                                            <small class="text-secondary opacity-75" style="z-index: 1;"><i class="bi bi-geo-alt me-1"></i>{{ event.venue.venue_name|default:"Campus Venue" }}</small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge badge-indigo-glass">
+                                        <i class="bi bi-tag-fill me-1"></i>{{ cat.name }}
+                                    </span>
+                                    <span class="badge badge-success-glass font-monospace fw-bold fs-6">
+                                        {% if event.registration_fee > 0 %}₹{{ event.registration_fee }}{% else %}FREE{% endif %}
+                                    </span>
+                                </div>
+
+                                <h4 class="fw-bold text-white mb-2 fs-4">{{ event.title }}</h4>
+                                
+                                <!-- Detailed Event Overview Section -->
+                                <div class="glass-card p-2.5 rounded-3 mb-3 border border-secondary border-opacity-25" style="background-color: var(--color-bg) !important; border: 1px solid var(--color-border) !important;">
+                                    <small class="text-info fw-bold d-block mb-1 text-uppercase tracking-wider" style="font-size:0.75rem;"><i class="bi bi-info-circle me-1"></i>About Event</small>
+                                    <p class="text-secondary small mb-0 line-clamp-3" style="line-height: 1.5;">{{ event.description|truncatewords:30 }}</p>
+                                </div>
+
+                                {% if event.skills_list %}
+                                    <div class="mb-3">
+                                        <small class="text-warning fw-bold d-block mb-1 text-uppercase tracking-wider" style="font-size:0.7rem;"><i class="bi bi-lightbulb me-1"></i>Skills You'll Gain:</small>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            {% for skill in event.skills_list|slice:":3" %}
+                                                <span class="badge px-2 py-1 rounded-pill fw-bold" style="background: rgba(217, 119, 6, 0.08); border: 1px solid rgba(217, 119, 6, 0.25); color: #D97706 !important; font-size:0.75rem;">
+                                                    {{ skill }}
+                                                </span>
+                                            {% endfor %}
+                                            {% if event.skills_list|length > 3 %}
+                                                <span class="badge bg-secondary opacity-75" style="font-size:0.75rem;">+{{ event.skills_list|length|add:"-3" }} more</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <div class="d-flex flex-column gap-2 mb-3">
+                                    <div class="event-meta-item">
+                                        <i class="bi bi-building text-info me-2"></i>
+                                        <span>Dept: <strong class="text-info">{{ event.department_name }}</strong></span>
+                                    </div>
+                                    <div class="event-meta-item">
+                                        <i class="bi bi-calendar-check-fill text-primary me-2"></i>
+                                        <span>{{ event.date|date:"d M Y" }} &bull; {{ event.time|time:"h:i A" }}</span>
+                                    </div>
+                                    <div class="event-meta-item">
+                                        <i class="bi bi-geo-alt-fill text-warning me-2"></i>
+                                        <span>{{ event.venue.venue_name|default:"TBA (Campus Auditorium)" }}</span>
+                                    </div>
+                                    <div class="event-meta-item">
+                                        <i class="bi bi-clock-history text-danger me-2"></i>
+                                        <span class="text-danger">Deadline: {{ event.deadline|date:"d M Y, h:i A" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-3 border-top border-secondary border-opacity-25 mt-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-secondary small"><i class="bi bi-person-fill me-1 text-primary"></i>Host: <strong>{{ event.organizer.full_name|default:event.organizer.username }}</strong></span>
+                                </div>
+                                <a href="{% url 'event_detail_page' event.event_id %}" class="btn btn-glass-primary w-100 py-2.5 fs-6 text-center">
+                                    View Details &amp; Register <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    <!-- Empty State if no events match search/filter -->
+    <div id="no-events-empty-state" class="glass-card text-center py-5" style="display: none;">
+        <div class="stat-icon-wrapper mx-auto mb-3" style="width: 70px; height: 70px; font-size: 2.2rem; background: rgba(38, 70, 83, 0.08); border: 1px solid rgba(38, 70, 83, 0.25); color: #264653;">
+            <i class="bi bi-calendar-x text-primary"></i>
+        </div>
+        <h4 class="text-dark fw-bold mb-2">No Matching Events Found</h4>
+        <p class="text-secondary small mb-0">Try adjusting your search query or switching category filter tab.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let activeCategoryId = 'all';
+
+    function filterEvents() {
+        const query = document.getElementById('event-search-input').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.event-card-item');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const title = (card.getAttribute('data-title') || '').toLowerCase();
+            const categoryName = (card.getAttribute('data-category-name') || '').toLowerCase();
+            const cardCatId = card.getAttribute('data-category');
+            
+            const matchesQuery = title.includes(query) || categoryName.includes(query);
+            const matchesCat = (activeCategoryId === 'all' || cardCatId === activeCategoryId);
+
+            if (matchesQuery && matchesCat) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        const emptyState = document.getElementById('no-events-empty-state');
+        if (emptyState) {
+            emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+    }
+
+    function filterCategory(catId, btn) {
+        activeCategoryId = String(catId);
+        document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active', 'btn-glass-primary'));
+        btn.classList.add('active', 'btn-glass-primary');
+
+        filterEvents();
+    }
+</script>
+{% endblock %}

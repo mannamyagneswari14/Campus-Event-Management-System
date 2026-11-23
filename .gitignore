@@ -1,0 +1,42 @@
+# Python / Django gitignore
+*.pyc
+*__pycache__*
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Database
+# db.sqlite3 tracked in git for Render persistent deployment
+
+# Media uploads & static build artifacts
+media/event_banners/*
+media/certificate_templates/*
+media/certificates/*
+media/payment_scanners/*
+media/payment_screenshots/*
+!media/event_banners/.gitkeep
+!media/certificate_templates/.gitkeep
+!media/certificates/.gitkeep
+!media/payment_scanners/.gitkeep
+!media/payment_screenshots/.gitkeep
+!media/event_banners/*.png
+!media/event_banners/*.jpg
+!media/payment_screenshots/*.png
+!media/payment_screenshots/*.jpg
+!media/payment_screenshots/*.jpeg
+!media/payment_screenshots/*.gif
+!media/payment_scanners/*.png
+!media/payment_scanners/*.jpg
+!media/payment_scanners/*.jpeg
+
+# Environment variables & local IDE settings
+.env
+.env.local
+.vscode/
+.idea/
+*.log
+*.swp
+*.ds_store
+staticfiles/
+powershell.cmd
+index.html
